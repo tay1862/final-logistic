@@ -58,7 +58,9 @@ function SheetContent({
         )}
         {...props}
       >
-        {children}
+        <div role="dialog" aria-modal="true" className="flex flex-col gap-4">
+          {children}
+        </div>
         {showCloseButton && (
           <SheetPrimitive.Close
             data-slot="sheet-close"

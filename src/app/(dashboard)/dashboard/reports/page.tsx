@@ -81,6 +81,7 @@ export default async function ReportsPage({ searchParams }: PageProps) {
 
       {/* UX-19: Date range filter */}
       <section className="surface-panel px-4 py-4 sm:px-5">
+        <p className="mb-3 text-sm font-medium text-muted-foreground">Date filter</p>
         <ReportsDateFilter dateFrom={dateFrom} dateTo={dateTo} />
       </section>
 

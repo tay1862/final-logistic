@@ -27,6 +27,8 @@ CREATE TYPE "ShipmentStatus_v2" AS ENUM (
   'cancelled'
 );
 
+ALTER TABLE "Shipment" ALTER COLUMN "status" DROP DEFAULT;
+
 ALTER TABLE "Shipment"
   ALTER COLUMN "status" TYPE "ShipmentStatus_v2"
   USING "status"::text::"ShipmentStatus_v2";
@@ -37,3 +39,5 @@ ALTER TABLE "ShipmentEvent"
 
 DROP TYPE "ShipmentStatus";
 ALTER TYPE "ShipmentStatus_v2" RENAME TO "ShipmentStatus";
+
+ALTER TABLE "Shipment" ALTER COLUMN "status" SET DEFAULT 'received'::"ShipmentStatus";

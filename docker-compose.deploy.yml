@@ -1,0 +1,90 @@
+# Local/IP-based production deployment. Builds from source and serves HTTP on port 8080.
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: tll_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tll_db
+      POSTGRES_USER: tll_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tll_user -d tll_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tll_network
+
+  bootstrap:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: tll_bootstrap
+    restart: "no"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://tll_user:${DB_PASSWORD}@db:5432/tll_db
+    command: npx prisma migrate deploy
+    networks:
+      - tll_network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tll_web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      bootstrap:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://tll_user:${DB_PASSWORD}@db:5432/tll_db
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://217.216.75.64:8080}
+      NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-en}
+      UPLOAD_DIR: /app/uploads
+      UPLOAD_MAX_SIZE_MB: ${UPLOAD_MAX_SIZE_MB:-5}
+      NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+      SENTRY_DSN: ${SENTRY_DSN:-}
+      SENTRY_ORG: ${SENTRY_ORG:-}
+      SENTRY_PROJECT: ${SENTRY_PROJECT:-}
+      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN:-}
+      SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-production}
+      NODE_ENV: production
+    volumes:
+      - uploads_data:/app/uploads
+    expose:
+      - "3000"
+    networks:
+      - tll_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: tll_nginx
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.ip.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - tll_network
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  tll_network:
+    driver: bridge

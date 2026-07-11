@@ -13,6 +13,12 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
 
   return (
     <div className="flex min-h-dvh bg-transparent text-foreground">
+      <MobileBottomNav
+        userRole={user.role}
+        userName={fullName}
+        branchName={user.branchName}
+      />
+
       <Sidebar
         userRole={user.role}
         userName={fullName}
@@ -29,11 +35,6 @@ export function DashboardShell({ user, children }: DashboardShellProps) {
         </main>
       </div>
 
-      <MobileBottomNav
-        userRole={user.role}
-        userName={fullName}
-        branchName={user.branchName}
-      />
     </div>
   )
 }

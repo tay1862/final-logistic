@@ -131,6 +131,20 @@ export default function CodPage() {
             <p className="page-subtitle">{t('cod.subtitle')}</p>
           </div>
         </div>
+        <Button
+          size="lg"
+          className="h-11 rounded-xl"
+          disabled={isLoading || !pending[0]}
+          onClick={() => {
+            const item = pending[0]
+            if (!item) return
+            setCollectingItem(item)
+            setCollectAmount(String(item.expectedAmount))
+            setNote(item.discrepancyNote ?? '')
+          }}
+        >
+          {t('cod.recordCollection')}
+        </Button>
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
@@ -312,6 +326,7 @@ export default function CodPage() {
                 <label className="text-sm font-medium text-foreground">{t('cod.actualAmount')}</label>
                 <Input
                   type="number"
+                  placeholder="Collected amount"
                   value={collectAmount}
                   onChange={(e) => setCollectAmount(e.target.value)}
                   className="h-12 rounded-xl"
@@ -320,6 +335,7 @@ export default function CodPage() {
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">{t('cod.discrepancyNote')}</label>
                 <Textarea
+                  placeholder="Discrepancy note"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   rows={3}

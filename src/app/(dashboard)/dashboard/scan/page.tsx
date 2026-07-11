@@ -2,6 +2,7 @@
 
 import { useState, lazy, Suspense, useCallback, useRef } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -42,6 +43,7 @@ type BatchPhase = 'idle' | 'setup' | 'scanning' | 'preview' | 'done'
 
 export default function ScanPage() {
   const { t } = useI18n()
+  const router = useRouter()
 
   // Single scan mode
   const [trackingNo, setTrackingNo] = useState('')
@@ -137,6 +139,7 @@ export default function ScanPage() {
       setLocation('')
       setNote('')
       toast.success(`${t('scan.saveSuccess')} — ${saved.trackingNo}`)
+      router.push(`/dashboard/shipments/${saved.id}`)
     } catch {
       setError(t('common.serverError'))
       toast.error(t('common.serverError'))
@@ -570,8 +573,20 @@ export default function ScanPage() {
                 </div>
 
                 {!shipment ? (
-                  <div className="surface-muted mt-5 px-4 py-10 text-center text-sm text-muted-foreground">
-                    {t('scan.lookupHint')}
+                  <div className="surface-muted mt-5 space-y-4 px-4 py-10 text-center text-sm text-muted-foreground">
+                    <p>{t('scan.lookupHint')}</p>
+                    <div className="mx-auto flex max-w-sm flex-wrap justify-center gap-2 sm:hidden" role="group" aria-label={t('scan.newStatus')} data-testid="status-pills-preview">
+                      {BATCH_STATUS_OPTIONS.slice(0, 4).map((option) => (
+                        <button
+                          key={option}
+                          type="button"
+                          disabled
+                          className="inline-flex h-10 items-center rounded-full border border-border/80 bg-white px-4 text-sm font-medium text-muted-foreground"
+                        >
+                          {t(`status.${option}`)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <div className="mt-5 space-y-5">

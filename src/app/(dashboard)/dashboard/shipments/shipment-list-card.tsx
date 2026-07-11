@@ -46,7 +46,7 @@ export function ShipmentListCard({ shipment }: Props) {
         >
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="mono-tracking text-sm font-semibold text-foreground truncate">{shipment.trackingNo}</span>
+              <span className="text-sm font-semibold text-foreground truncate">{shipment.trackingNo}</span>
               <StatusBadge status={shipment.status as Parameters<typeof StatusBadge>[0]['status']} />
             </div>
             <p className="mt-0.5 text-sm text-muted-foreground truncate">
